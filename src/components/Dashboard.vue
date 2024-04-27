@@ -54,13 +54,13 @@ const dashboard = ref(JSON.parse(localStorage.getItem('dashboard') || '[{"object
 
 const maximizedPane = ref(null);
 
-function resizeRows(event: Array) {
+function resizeRows(event: any) {
   for (var index in event) {
     dashboard.value[index]['object'] = event[index];
   }
   localStorage.setItem('dashboard', JSON.stringify(dashboard.value))
 }
-function resizeCols(row, event) {
+function resizeCols(row: any, event: any) {
   for (var index in event) {
     dashboard.value[row]['panes'][index]['object'] = event[index];
   }
@@ -70,18 +70,18 @@ function addRowPane() {
   dashboard.value.push({ 'object': {}, 'panes': [{ 'object': {} }] });
   localStorage.setItem('dashboard', JSON.stringify(dashboard.value))
 }
-function removeRowPane(rowIndex) {
+function removeRowPane(rowIndex: any) {
   dashboard.value.splice(rowIndex, 1);
   localStorage.setItem('dashboard', JSON.stringify(dashboard.value))
 }
-function addColPane(rowIndex) {
+function addColPane(rowIndex: any) {
   /*const lastColIndex = dashboard.value[rowIndex]['panes'].length - 1
   const size = dashboard.value[rowIndex]['panes'][lastColIndex].size / 2
   dashboard.value[rowIndex]['panes'][lastColIndex].size = size*/
   dashboard.value[rowIndex]['panes'].push({ 'object': { size: null } });
   localStorage.setItem('dashboard', JSON.stringify(dashboard.value))
 }
-function removeColPane(rowIndex, colIndex) {
+function removeColPane(rowIndex: any, colIndex: any) {
   dashboard.value[rowIndex]['panes'].splice(colIndex, 1);
   localStorage.setItem('dashboard', JSON.stringify(dashboard.value))
 }
