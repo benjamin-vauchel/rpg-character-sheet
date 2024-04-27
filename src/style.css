@@ -1,7 +1,7 @@
 @font-face {
   font-family: 'Star Jedi';
-  src: url('StarJedi.woff2') format('woff2'),
-    url('StarJedi.woff') format('woff');
+  src: url('../public/StarJedi.woff2') format('woff2'),
+    url('../public/StarJedi.woff') format('woff');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -9,8 +9,8 @@
 
 @font-face {
   font-family: 'Aurebesh';
-  src: url('Aurebesh.woff2') format('woff2'),
-    url('Aurebesh.woff') format('woff');
+  src: url('../public/Aurebesh.woff2') format('woff2'),
+    url('../public/Aurebesh.woff') format('woff');
   font-weight: normal;
   font-style: normal;
   font-display: swap;

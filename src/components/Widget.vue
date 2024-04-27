@@ -4,6 +4,7 @@ import Field from './Field.vue';
 import FieldGroup from './FieldGroup.vue';
 import Title from './Blocks/Title.vue';
 import Avatar from './Blocks/Avatar.vue';
+import avatar from '../../public/avatar.jpg'
 import { ref } from 'vue';
 
 let motivations = ref([
@@ -57,7 +58,7 @@ function removeObligation(index: number) {
     <div class="widget">
         <div class="inner-wrapper">
             <Title content="Character" />
-            <Avatar imageUrl="/avatar.jpg" />
+            <Avatar :imageUrl="avatar" />
             <Block class="infos">
                 <Field is-important label="Name" data="Hatu" />
                 <Field is-important label="Race" data="Zabrak" />
@@ -97,7 +98,7 @@ function removeObligation(index: number) {
     border-image-width: 20px 20px 20px 20px;
     border-image-outset: 0px 0px 0px 0px;
     border-image-repeat: stretch stretch;
-    border-image-source: url("border.svg");
+    border-image-source: url("/border.svg");
 }
 
 .widget::after {
