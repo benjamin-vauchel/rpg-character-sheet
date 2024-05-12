@@ -1,121 +1,88 @@
 <script setup lang="ts">
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
-import { ref } from 'vue'
-import { store } from '../store'
-
-const count = ref(2)
+import { ref, watch, reactive, Ref } from 'vue'
 import Widget from './Widget.vue'
+import { supabase } from '../supabase'
+import { useGlobalStore } from '../stores/global'
+import { Dashboard } from '../types/dashboard'
 
-const dashboard = ref(JSON.parse(localStorage.getItem('dashboard') || '[{"object":{}, "panes":[{"object":{}}]}]'));
+const store = useGlobalStore()
+if(store.currentCharacterSheet === null) {
+throw new Error();
+}
 
-/*const dashboard = ref(
-[
-  {
-    object: {
-      size: 10
-    },
-    panes: [
-      {
-        object: {
-          size: 20
-        },
-      },
-      {
-        object: {
-          size: 80
-        },
-      }
-    ]
+const dashboards = reactive(store.currentCharacterSheet.dashboards)
+
+watch(
+  dashboards,
+  async (newDashboards: Dashboard[]) => {
+
+if(store.currentCharacterSheet === null) {
+throw new Error();
+}
+    await supabase.from('character_sheet').update({ dashboards: newDashboards }).eq('id', store.currentCharacterSheet.id);
   },
-  {
-    object: {
-      size: 90
-    },
-    panes: [
-      {
-        object: {
-          size: 10
-        },
-      },
-      {
-        object: {
-          size: 40
-        },
-      },
-      {
-        object: {
-          size: 50
-        },
-      }
-    ]
-  },
-])*/
+  { deep: true }
+)
 
-const maximizedPane = ref(null);
+const maximizedPane: Ref<[number, number, number]|null> = ref(null);
 
 function resizeRows(event: any) {
   for (var index in event) {
-    dashboard.value[index]['object'] = event[index];
+    dashboards[store.currentDashboard][parseInt(index)].object = event[index];
   }
-  localStorage.setItem('dashboard', JSON.stringify(dashboard.value))
 }
 function resizeCols(row: any, event: any) {
   for (var index in event) {
-    dashboard.value[row]['panes'][index]['object'] = event[index];
+    dashboards[store.currentDashboard][row]['panes'][parseInt(index)]['object'] = event[index];
   }
-  localStorage.setItem('dashboard', JSON.stringify(dashboard.value))
 }
 function addRowPane() {
-  dashboard.value.push({ 'object': {}, 'panes': [{ 'object': {} }] });
-  localStorage.setItem('dashboard', JSON.stringify(dashboard.value))
+  dashboards[store.currentDashboard].push({ 'object': {}, 'panes': [{ 'object': {} }] });
 }
 function removeRowPane(rowIndex: any) {
-  dashboard.value.splice(rowIndex, 1);
-  localStorage.setItem('dashboard', JSON.stringify(dashboard.value))
+  dashboards[store.currentDashboard].splice(rowIndex, 1);
 }
 function addColPane(rowIndex: any) {
-  /*const lastColIndex = dashboard.value[rowIndex]['panes'].length - 1
-  const size = dashboard.value[rowIndex]['panes'][lastColIndex].size / 2
-  dashboard.value[rowIndex]['panes'][lastColIndex].size = size*/
-  dashboard.value[rowIndex]['panes'].push({ 'object': { size: null } });
-  localStorage.setItem('dashboard', JSON.stringify(dashboard.value))
+  dashboards[store.currentDashboard][rowIndex]['panes'].push({ 'object': { size: null } });
 }
 function removeColPane(rowIndex: any, colIndex: any) {
-  dashboard.value[rowIndex]['panes'].splice(colIndex, 1);
-  localStorage.setItem('dashboard', JSON.stringify(dashboard.value))
+  dashboards[store.currentDashboard][rowIndex]['panes'].splice(colIndex, 1);
 }
 </script>
 
 <template>
-  <div style="padding: calc(1rem - 2px); overflow: hidden;">
-    <splitpanes class="default-theme" :horizontal=true @resized="resizeRows($event)">
-      <template v-for="(rowPane, rowIndex) in dashboard">
+  <template v-for="dashboard, i in dashboards">
+    <div style="padding: calc(1rem - 2px); overflow: hidden;" v-if="i === store.currentDashboard">
+      <splitpanes class="default-theme" :horizontal=true @resized="resizeRows($event)">
+        <template v-for="(rowPane, rowIndex) in dashboard">
 
-        <pane v-if="maximizedPane === null || maximizedPane[0] === rowIndex" :size="rowPane.object.size" class="pane">
-          <nav v-if="store.dashboardEdition" class="rowNav">
-            <button @click="addRowPane()">add row</button>
-            <button @click="removeRowPane(rowIndex)">remove row</button>
-          </nav>
-          <splitpanes class="default-theme" @splitter-click="count++" @resized="resizeCols(rowIndex, $event)">
-            <template v-for="(colPane, colIndex) in rowPane.panes">
-              <pane v-if="maximizedPane === null || maximizedPane[1] === colIndex" class="pane"
-                :size="colPane.object.size">
-                <nav v-if="store.dashboardEdition" class="colNav">
-                  <button @click="addColPane(rowIndex)">add col</button>
-                  <button @click="removeColPane(rowIndex, colIndex)">remove col</button>
-                </nav>
-                <!--<button
-                  @click="maximizedPane === null ? maximizedPane = [rowIndex, colIndex] : maximizedPane = null">maximize</button>
-                --><Widget />
-              </pane>
-            </template>
-          </splitpanes>
+          <pane v-if="maximizedPane === null || (maximizedPane[0] === i && maximizedPane[1] === rowIndex)" :size="rowPane.object.size" class="pane">
+            <nav v-if="store.dashboardEdition" class="rowNav">
+              <button @click="addRowPane()">add row</button>
+              <button @click="removeRowPane(rowIndex)">remove row</button>
+            </nav>
+            <splitpanes class="default-theme" @resized="resizeCols(rowIndex, $event)">
+              <template v-for="(colPane, colIndex) in rowPane.panes">
+                <pane v-if="maximizedPane === null || maximizedPane[1] === colIndex" class="pane"
+                  :size="colPane.object.size">
+                  <nav v-if="store.dashboardEdition" class="colNav">
+                    <button @click="addColPane(rowIndex)">add col</button>
+                    <button @click="removeColPane(rowIndex, colIndex)">remove col</button>
+                  <button @click="maximizedPane === null ? maximizedPane = [i, rowIndex, colIndex] : maximizedPane = null">maximize</button>
 
-        </pane>
-      </template>
-    </splitpanes>
-  </div>
+                  </nav>
+                
+                  <Widget />
+                </pane>
+              </template>
+            </splitpanes>
+          </pane>
+        </template>
+      </splitpanes>
+    </div>
+  </template>
 </template>
 
 <style scoped>

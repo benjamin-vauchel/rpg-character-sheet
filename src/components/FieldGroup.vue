@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Button from './Button.vue';
+import MiniButton from './MiniButton.vue';
 defineProps<{
     allowAdd:  boolean,
     allowRemove:  boolean,
@@ -9,8 +9,8 @@ defineProps<{
     <div class="field-group">
         <slot></slot>
         <div class="actions" v-if="allowAdd || allowRemove">
-            <Button v-if="allowRemove" :active=false text="-"  @click="$emit('remove')"></Button>
-            <Button v-if="allowAdd" :active=false text="+"  @click="$emit('add')"></Button>
+            <MiniButton v-if="allowRemove" :active=false text="-"  @click="$emit('remove')"></MiniButton>
+            <MiniButton v-if="allowAdd" :active=false text="+"  @click="$emit('add')"></MiniButton>
         </div>
     </div>
 </template>
