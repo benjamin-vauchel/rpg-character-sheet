@@ -8,6 +8,7 @@ export const useGlobalStore = defineStore('global', () => {
     const currentCharacterSheet: Ref<Tables<'character_sheet'> | null> = ref(null)
     const currentDashboard = ref(0)
     const dashboardEdition = ref(false)
+    const widgetEdition: Ref<[number, number]|null> = ref(null)
   
-    return { player, characterSheets, currentCharacterSheet, currentDashboard, dashboardEdition }
+    return { player, characterSheets, currentCharacterSheet, currentDashboard, dashboardEdition, widgetEdition }
   })

@@ -6,6 +6,7 @@ import Widget from './Widget.vue'
 import { supabase } from '../supabase'
 import { useGlobalStore } from '../stores/global'
 import { Dashboard } from '../types/dashboard'
+import MiniButton from './MiniButton.vue'
 
 const store = useGlobalStore()
 if(store.currentCharacterSheet === null) {
@@ -17,10 +18,9 @@ const dashboards = reactive(store.currentCharacterSheet.dashboards)
 watch(
   dashboards,
   async (newDashboards: Dashboard[]) => {
-
-if(store.currentCharacterSheet === null) {
-throw new Error();
-}
+    if(store.currentCharacterSheet === null) {
+      throw new Error();
+    }
     await supabase.from('character_sheet').update({ dashboards: newDashboards }).eq('id', store.currentCharacterSheet.id);
   },
   { deep: true }
@@ -50,6 +50,9 @@ function addColPane(rowIndex: any) {
 function removeColPane(rowIndex: any, colIndex: any) {
   dashboards[store.currentDashboard][rowIndex]['panes'].splice(colIndex, 1);
 }
+function editWidget(rowIndex: number, colIndex: number) {
+  store.widgetEdition = [rowIndex, colIndex]
+}
 </script>
 
 <template>
@@ -59,7 +62,7 @@ function removeColPane(rowIndex: any, colIndex: any) {
         <template v-for="(rowPane, rowIndex) in dashboard">
 
           <pane v-if="maximizedPane === null || (maximizedPane[0] === i && maximizedPane[1] === rowIndex)" :size="rowPane.object.size" class="pane">
-            <nav v-if="store.dashboardEdition" class="rowNav">
+            <nav v-if="false" class="rowNav">
               <button @click="addRowPane()">add row</button>
               <button @click="removeRowPane(rowIndex)">remove row</button>
             </nav>
@@ -67,14 +70,15 @@ function removeColPane(rowIndex: any, colIndex: any) {
               <template v-for="(colPane, colIndex) in rowPane.panes">
                 <pane v-if="maximizedPane === null || maximizedPane[1] === colIndex" class="pane"
                   :size="colPane.object.size">
-                  <nav v-if="store.dashboardEdition" class="colNav">
+                  <nav v-if="false" class="colNav">
                     <button @click="addColPane(rowIndex)">add col</button>
                     <button @click="removeColPane(rowIndex, colIndex)">remove col</button>
-                  <button @click="maximizedPane === null ? maximizedPane = [i, rowIndex, colIndex] : maximizedPane = null">maximize</button>
-
+                    <button @click="maximizedPane === null ? maximizedPane = [i, rowIndex, colIndex] : maximizedPane = null">maximize</button>
                   </nav>
-                
                   <Widget />
+                  <div class="edit-overlay" v-if="store.dashboardEdition">
+                    <MiniButton icon="circle-dot" big @click="editWidget(rowIndex, colIndex)" v-if="!store.widgetEdition"/>
+                  </div>
                 </pane>
               </template>
             </splitpanes>
@@ -102,5 +106,23 @@ function removeColPane(rowIndex: any, colIndex: any) {
 .splitpanes.default-theme .splitpanes__pane {
   background-color: #fff;
   display: flex;
+}
+
+.edit-overlay {
+  background: rgba(255, 255, 255, 0.4);
+  position: absolute;
+  top: .2rem;
+  left: .2rem;
+  right: .2rem;
+  bottom: .2rem;
+  z-index: 990;
+  backdrop-filter: blur(3px);
+  border-radius:1rem;
+}
+.edit-overlay :deep(.button) {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
 }
 </style>

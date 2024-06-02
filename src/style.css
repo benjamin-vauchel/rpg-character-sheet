@@ -83,7 +83,7 @@ body {
   overflow: hidden;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: 1fr 6vh;
+  grid-template-rows: 1fr 4vh;
   grid-column-gap: 0;
   grid-row-gap: 0;
   background-color: rgba(255, 255, 255, .7);
