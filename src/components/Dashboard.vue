@@ -38,18 +38,6 @@ function resizeCols(row: any, event: any) {
     dashboards[store.currentDashboard][row]['panes'][parseInt(index)]['object'] = event[index];
   }
 }
-function addRowPane() {
-  dashboards[store.currentDashboard].push({ 'object': {}, 'panes': [{ 'object': {} }] });
-}
-function removeRowPane(rowIndex: any) {
-  dashboards[store.currentDashboard].splice(rowIndex, 1);
-}
-function addColPane(rowIndex: any) {
-  dashboards[store.currentDashboard][rowIndex]['panes'].push({ 'object': { size: null } });
-}
-function removeColPane(rowIndex: any, colIndex: any) {
-  dashboards[store.currentDashboard][rowIndex]['panes'].splice(colIndex, 1);
-}
 function editWidget(rowIndex: number, colIndex: number) {
   store.widgetEdition = [rowIndex, colIndex]
 }
@@ -62,21 +50,12 @@ function editWidget(rowIndex: number, colIndex: number) {
         <template v-for="(rowPane, rowIndex) in dashboard">
 
           <pane v-if="maximizedPane === null || (maximizedPane[0] === i && maximizedPane[1] === rowIndex)" :size="rowPane.object.size" class="pane">
-            <nav v-if="false" class="rowNav">
-              <button @click="addRowPane()">add row</button>
-              <button @click="removeRowPane(rowIndex)">remove row</button>
-            </nav>
             <splitpanes class="default-theme" @resized="resizeCols(rowIndex, $event)">
               <template v-for="(colPane, colIndex) in rowPane.panes">
                 <pane v-if="maximizedPane === null || maximizedPane[1] === colIndex" class="pane"
                   :size="colPane.object.size">
-                  <nav v-if="false" class="colNav">
-                    <button @click="addColPane(rowIndex)">add col</button>
-                    <button @click="removeColPane(rowIndex, colIndex)">remove col</button>
-                    <button @click="maximizedPane === null ? maximizedPane = [i, rowIndex, colIndex] : maximizedPane = null">maximize</button>
-                  </nav>
-                  <Widget />
-                  <div class="edit-overlay" v-if="store.dashboardEdition">
+                  <Widget :class="{'not-edited': (store.widgetEdition && (store.widgetEdition[0] !== rowIndex || store.widgetEdition[1] !== colIndex))}" />
+                  <div :class="{'edit-overlay': true, 'editing-overlay' : store.widgetEdition }" v-if="store.dashboardEdition">
                     <MiniButton icon="circle-dot" big @click="editWidget(rowIndex, colIndex)" v-if="!store.widgetEdition"/>
                   </div>
                 </pane>
@@ -93,14 +72,6 @@ function editWidget(rowIndex: number, colIndex: number) {
 .pane {
   container-type: size;
   container-name: pane;
-}
-
-.pane nav.colNav {
-  margin-top: 1rem;
-}
-
-.pane nav.colNav button {
-  background-color: #aaa;
 }
 
 .splitpanes.default-theme .splitpanes__pane {
@@ -124,5 +95,11 @@ function editWidget(rowIndex: number, colIndex: number) {
   top: 50%;
   left: 50%;
   transform: translate(-50%,-50%);
+}
+.editing-overlay {
+  backdrop-filter: none;
+}
+:deep(.not-edited) {
+  opacity: .2;
 }
 </style>

@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import Dashboard from './components/Dashboard.vue'
 import CharacterSheetList from './components/CharacterSheetList.vue'
-import NavBar from './components/NavBar.vue'
+import CharacterSheet from './components/CharacterSheet.vue'
 import Auth from './components/Auth.vue'
 import { supabase } from './supabase'
 import { useGlobalStore } from './stores/global'
@@ -41,8 +40,7 @@ onMounted(async () => {
 
 <template>
   <template v-if="session && store.currentCharacterSheet">
-    <Dashboard />
-    <NavBar />
+    <CharacterSheet/>
   </template>
   <template v-else-if="session && store.player && store.characterSheets">
     <CharacterSheetList />
